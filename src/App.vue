@@ -1,6 +1,9 @@
 <template>
   <div class="student-list-container">
-    <div class="student-list" v-for="student in students" :key="student.id">
+    <div class="student-list-search-wrapper">
+      <input type="text" v-model="search" placeholder="Search by name">
+    </div>
+    <div class="student-list" v-for="student in filteredStudents" :key="student.id">
       <div class="student-list-image">
         <img :src="student.pic" :alt="'portrait of ' + student.firstName + ' ' + student.lastName">
       </div>
@@ -25,6 +28,7 @@ export default {
   data() {
     return{
       students: [],
+      search: ''
     }
   },
   mounted(){
@@ -40,6 +44,13 @@ export default {
     .catch(function(error){
         console.log(error);
       });  
+  },
+  computed: {
+    filteredStudents() {
+      return this.students.filter( student => {
+        return student.firstName.toLowerCase().includes(this.search.toLowerCase()) || student.lastName.toLowerCase().includes(this.search.toLowerCase());
+      })
+    }
   },
   methods: {
     getAverage(arr) {
@@ -84,13 +95,30 @@ export default {
         border-radius: 10px;
       }   
     }
+    .student-list-search-wrapper {
+      display: flex;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+
+      input {
+        display: block;
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid black;
+        font-size: 1rem;
+        padding: 1rem 0.5rem;
+        margin: 0 0.5rem;
+        outline: none;
+      }
+    }
 
     .student-list {
       display: flex;
       padding: 1rem;
       flex-direction: row;
       align-items: center;
-      border-bottom: 2px solid rgb(241, 241, 241);
+      border-bottom: $border-bottom;
 
       .student-list-image {
         display: flex;
