@@ -4,19 +4,26 @@
       <input type="text" v-model="search" placeholder="Search by name">
     </div>
     <div class="student-list" v-for="student in filteredStudents" :key="student.id">
-      <div class="student-list-image">
-        <img :src="student.pic" :alt="'portrait of ' + student.firstName + ' ' + student.lastName">
+      <div class="student-list-main">
+        <div class="student-list-image">
+          <img :src="student.pic" :alt="'portrait of ' + student.firstName + ' ' + student.lastName">
+        </div>
+        <div class="student-list-info">
+          <h3>{{`${student.firstName} ${student.lastName}`}}</h3>
+          <ul>
+            <li>Email: {{student.email}}</li>
+            <li>Company: {{student.company}}</li>
+            <li>Skill: {{student.skill}}</li>
+            <li>Average: {{getAverage(student.grades)}}% </li>
+          </ul>
+          <div class="student-list-grades-min" :class="{expanded: expanded.includes(student)}" >
+            <ul v-for="(grades, index) in student.grades" :key="grades">
+              <li>test {{index+1}}: {{grades}}</li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="student-list-info">
-        <h3>{{`${student.firstName} ${student.lastName}`}}</h3>
-        <ul>
-          <li>Email: {{student.email}}</li>
-          <li>Company: {{student.company}}</li>
-          <li>Skill: {{student.skill}}</li>
-          <li>Average: {{getAverage(student.grades)}}% </li>
-        </ul>
-      </div>
-      
+      <button class="expand-btn" :class="{showMinus: expanded.includes(student)}"  @click="expand(student)"></button>
     </div>
   </div>
 </template>
@@ -28,7 +35,9 @@ export default {
   data() {
     return{
       students: [],
-      search: ''
+      expanded: [],
+      search: '',
+      showList: false,
     }
   },
   mounted(){
@@ -43,7 +52,7 @@ export default {
       })
     .catch(function(error){
         console.log(error);
-      });  
+      }); 
   },
   computed: {
     filteredStudents() {
@@ -60,8 +69,16 @@ export default {
       }
       const avg = sum/arr.length;
       return avg
-    }
-    }
+    },
+    expand(student){
+      const index = this.expanded.indexOf(student)
+      if (index >= 0) {
+        this.expanded.splice(index,1)
+      } else {
+        this.expanded.push(student)
+      }
+    },
+  },
 }
 </script>
 
@@ -72,18 +89,19 @@ export default {
     margin-top: 5rem;
     margin-bottom: 5rem;
     width: 60vw;
-    height: 83vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    /* border: 1px solid gray; */
+    height: 82vh;
+    overflow: auto;
     border-radius: 10px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 10px;
 
-    &:hover {
-      overflow-y: auto;
-      
+    &::-webkit-scrollbar {
+      background: transparent;
+      width: 0.5rem;
+    }
 
+    &:hover {
+      overflow-y: scroll;
+      
       &::-webkit-scrollbar {
         width: 0.5rem;
       }
@@ -93,8 +111,9 @@ export default {
       &::-webkit-scrollbar-thumb {
         background: #aaa3aa;
         border-radius: 10px;
-      }   
+      }
     }
+
     .student-list-search-wrapper {
       display: flex;
       position: sticky;
@@ -115,43 +134,83 @@ export default {
 
     .student-list {
       display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       padding: 1rem;
-      flex-direction: row;
-      align-items: center;
       border-bottom: $border-bottom;
-
-      .student-list-image {
+      
+      .student-list-main {
         display: flex;
-        justify-content: center;
 
-        img {
-          width: 7rem;
-          border-radius: 100%;
-          border: 1px solid rgb(207, 206, 206);
+        .student-list-image {
+          display: flex;
+          justify-content: center;
+          align-self: flex-start;
+
+          img {
+            width: 7rem;
+            border-radius: 100%;
+            border: 1px solid rgb(207, 206, 206);
+          }
+        }
+
+        .student-list-info {
+          margin-left: 2rem;
+
+          h3 {
+            text-transform: uppercase;
+            font-size: 2.3rem;
+            margin-bottom: 0.7rem;
+            margin-top: 0;
+ 
+          }
+
+          ul {
+            margin: 0;
+            padding-left: 1.2rem;
+
+            li {
+            margin: 0;
+            list-style: none;
+            font-weight: 200;
+            line-height: 1.5;
+            }
+          }
+          
+          .student-list-grades-min {
+            display: none;
+          }
+          .expanded {
+            display: block;
+          }
         }
       }
 
-      .student-list-info {
-        margin-left: 2rem;
+      .expand-btn {
+        background: transparent;
+        background-image: url(assets/plus-solid.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        cursor: pointer;
+        opacity: 0.4;
 
-        h3 {
-          text-transform: uppercase;
-          font-size: 2.3rem;
-          margin-bottom: 0.7rem;
-          margin-top: 0;
+        &:hover {
+          opacity: 1;
         }
-        ul {
-          margin: 0;
-          padding-left: 1.2rem;
+      }
 
-          li {
-          margin: 0;
-          list-style: none;
-          font-weight: 200;
-          line-height: 1.5;
-          }
-        }
-        
+      .showMinus {
+        background: transparent;
+        background-image: url(assets/minus-solid.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        cursor: pointer;  
       }
     }
 
